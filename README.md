@@ -32,10 +32,10 @@ There are quite a few options there and it might seem overwhelming at
 first, so you might want to try the GUI version first.
 
 ##### *GUI*
-Run `java -jar OpenSeachKDE.jar --gui` to launch the GUI. You might want to
+Run `java -jar okde-x.x.jar --gui` to launch the GUI. You might want to
 include a JVM switch `-Xmx2G` (change the number to the amount of gigabytes of
 memory you'll allow the process to consume), so the command becomes:  
-`java -Xmx2G -jar OpenSeachKDE.jar --gui`
+`java -Xmx2G -jar okde-x.x.jar --gui`
 
 ## Input
 The program takes **.pep.xml** files as input. It can accept whole directories
