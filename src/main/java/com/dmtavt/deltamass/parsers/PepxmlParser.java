@@ -156,7 +156,6 @@ public class PepxmlParser implements IPepidParser {
           if (charge != 0) {
             // TODO: is this value really not present in pepxml and need to be computed?
             spm.mzObs = (precMassZ0 + charge * PROTON_MASS) / charge;
-            int a = 1;
           }
           spm.spectrumId = spectrumId;
           spm.seq = sh.getPeptide();
@@ -206,23 +205,28 @@ public class PepxmlParser implements IPepidParser {
                   + "spectrum query `%s`", i, sq.getSpectrum()));
             }
           }
-          if (pepProphIdx > -1) {
-            Object analysis = sh.getAnalysisResult().stream()
-                .flatMap(analysisResult -> analysisResult.getAny().stream())
-                .filter(o -> o instanceof PeptideprophetResult).findAny()
-                .orElseThrow(() -> new IllegalStateException(String.format(
-                    "PeptideProphet score could not be found in file `%s`, SpectrumQuery `%s`",
-                    path, sq.getSpectrum())));
-            spm.scores[pepProphIdx] = ((PeptideprophetResult) analysis).getProbability();
-          }
-          if (iProphIdx> -1) {
-            Object analysis = sh.getAnalysisResult().stream()
-                .flatMap(analysisResult -> analysisResult.getAny().stream())
-                .filter(o -> o instanceof InterprophetResult).findAny()
-                .orElseThrow(() -> new IllegalStateException(String.format(
-                    "iProphet score could not be found in file `%s`, SpectrumQuery `%s`", path,
-                    sq.getSpectrum())));
-            spm.scores[iProphIdx] = ((InterprophetResult) analysis).getProbability();
+          try {
+            if (pepProphIdx > -1) {
+              Object analysis = sh.getAnalysisResult().stream()
+                  .flatMap(analysisResult -> analysisResult.getAny().stream())
+                  .filter(o -> o instanceof PeptideprophetResult).findAny()
+                  .orElseThrow(() -> new IllegalStateException(String.format(
+                      "PeptideProphet score could not be found in file `%s`, SpectrumQuery `%s`",
+                      path, sq.getSpectrum())));
+              spm.scores[pepProphIdx] = ((PeptideprophetResult) analysis).getProbability();
+            }
+            if (iProphIdx > -1) {
+              Object analysis = sh.getAnalysisResult().stream()
+                  .flatMap(analysisResult -> analysisResult.getAny().stream())
+                  .filter(o -> o instanceof InterprophetResult).findAny()
+                  .orElseThrow(() -> new IllegalStateException(String.format(
+                      "iProphet score could not be found in file `%s`, SpectrumQuery `%s`", path,
+                      sq.getSpectrum())));
+              spm.scores[iProphIdx] = ((InterprophetResult) analysis).getProbability();
+            }
+          } catch (IllegalStateException e) {
+            log.warn(e.getMessage());
+            throw e;
           }
           spms.add(spm);
         }
@@ -254,7 +258,7 @@ public class PepxmlParser implements IPepidParser {
       scoreMapping.put(scoreName, scoreIndex);
     }
 
-    // try get peptide prophet score
+    // try get peptidepprophet/iprophet score
     List<AnalysisResult> analysisResults = sh.getAnalysisResult();
     for (AnalysisResult analysisResult : analysisResults) {
       String analysis = analysisResult.getAnalysis();

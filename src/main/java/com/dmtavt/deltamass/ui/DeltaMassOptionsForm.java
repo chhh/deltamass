@@ -18,6 +18,7 @@ import com.dmtavt.deltamass.messages.MsgFlushGuiCache;
 import com.dmtavt.deltamass.messages.MsgRunPlot;
 import com.dmtavt.deltamass.messages.MsgStop;
 import com.dmtavt.deltamass.messages.MsgVersionUpdateInfo;
+import com.dmtavt.deltamass.utils.OsUtils;
 import com.github.chhh.utils.StringUtils;
 import com.github.chhh.utils.SwingUtils;
 import com.github.chhh.utils.ser.SwingCachePropsStore;
@@ -56,6 +57,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import net.java.balloontip.BalloonTip;
@@ -332,11 +334,22 @@ public class DeltaMassOptionsForm extends JPanel {
       bus.post(new MsgStop(uiBtnStop));
     });
 
+
+
     bus.register(this);
     // Try to fetch new version info from remote. Runs in a separate thread.
     DeltaMassInfo.checkForNewVersions();
 
     cache.load(this);
+    logSysInfo();
+  }
+
+  /** Log system info. */
+  private void logSysInfo() {
+    final StringBuilder sb = new StringBuilder("System info:\n");
+    sb.append(OsUtils.osInfo()).append("\n");
+    sb.append(OsUtils.javaInfo());
+    log.info(sb.toString());
   }
 
   @Subscribe

@@ -259,6 +259,11 @@ public class LogicInputFiles {
     return matched;
   }
 
+  private boolean isPepFileSupported(Path pepFilePath) {
+    IParserFactory<IPepidParser> parser = PepidParserRegistry.find(pepFilePath);
+    return parser != null;
+  }
+
   private List<Path> collectSupportedFiles(Iterable<? extends Path> paths, boolean recursive) {
     final ConcurrentLinkedQueue<Path> supported = new ConcurrentLinkedQueue<>();
 
@@ -280,8 +285,7 @@ public class LogicInputFiles {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-              IParserFactory<IPepidParser> parser = PepidParserRegistry.find(file);
-              if (parser != null) {
+              if (isPepFileSupported(file)) {
                 supported.add(file);
               }
               return FileVisitResult.CONTINUE;
@@ -292,8 +296,10 @@ public class LogicInputFiles {
           log.warn("Error collecting files for deletion in subtree: {}" + path, e);
         }
       } else {
-        if (CacheLocator.isPepCacheFile(path))
+        // given a regular file, not a directory
+        if (isPepFileSupported(path)) {
           supported.add(path);
+        }
       }
     }
     return new ArrayList<>(supported);

@@ -25,37 +25,45 @@ public class LogicClean {
 
   public void run() {
     log.info("Running cleanup");
-    if (cmd.dryRun) log.info("Dry-run, won't take any action.");
-    int stepsPerformed = 0;
+    final List<Path> scheduledForDeletion = getScheduledForDeletion();
 
-    if (!cmd.noPep) {
-      stepsPerformed++;
-      log.info("Cleaning up peptide identification files.");
-      DeletionStats stats = deleteMatchingFilesInSubtrees(cmd.inputFiles,
-          CacheLocator::isPepCacheFile, cmd.dryRun);
-      log.info("Pep ID cleanup summary: scheduled: {}, deleted: {}, skipped: {}, error: {}",
-          stats.scheduled, stats.deleted, stats.skipped.size(), stats.error.size());
+    final String list = scheduledForDeletion.stream().map(Path::toString)
+        .collect(Collectors.joining("\n"));
+    log.info("Files to delete:\n" + list);
+
+    if (cmd.dryRun) {
+      log.info("Dry-run, won't take any action.");
+      return;
     }
 
-    if (!cmd.noLcms) {
-      stepsPerformed++;
-      log.info("Cleaning up LC-MS calibration files.");
-      DeletionStats stats = deleteMatchingFilesInSubtrees(cmd.inputFiles,
-          CacheLocator::isCalCacheFile, cmd.dryRun);
-      log.info("Calibration cleanup summary: scheduled: {}, deleted: {}, skipped: {}, error: {}",
-          stats.scheduled, stats.deleted, stats.skipped.size(), stats.error.size());
-    }
+    DeletionStats stats = delete(scheduledForDeletion);
+    log.info("Cleanup: deleted {}/{}, errors: {}", stats.deleted.size(), stats.scheduled.size(), stats.error.size());
+  }
 
-    if (stepsPerformed == 0) log.info("You made it clear that nothing should be cleaned up. Doing nothing.");
+  private static List<Path> modifyInputPathsForCacheDeletion(List<Path> paths) {
+    List<Path> possibleCachePaths = new ArrayList<>();
+    for (Path inputFile : paths) {
+      if (Files.isDirectory(inputFile)) {
+        possibleCachePaths.add(inputFile);
+      } else {
+        Path parent = inputFile.getParent();
+        Path fn = inputFile.getFileName();
+        possibleCachePaths.add(parent.resolve(fn.toString() + CacheLocator.CACHE_EXT_PEP));
+        possibleCachePaths.add(parent.resolve(fn.toString() + CacheLocator.CACHE_EXT_CAL));
+      }
+    }
+    return possibleCachePaths;
   }
 
   public List<Path> getScheduledForDeletion() {
     List<Path> delete = new ArrayList<>();
+    final List<Path> putativeCachePaths = modifyInputPathsForCacheDeletion(cmd.inputFiles);
+
     if (!cmd.noPep) {
-      delete.addAll(getScheduledForDeletion(cmd.inputFiles, CacheLocator::isPepCacheFile));
+      delete.addAll(getScheduledForDeletion(putativeCachePaths, CacheLocator::isPepCacheFile));
     }
     if (!cmd.noLcms) {
-      delete.addAll(getScheduledForDeletion(cmd.inputFiles, CacheLocator::isCalCacheFile));
+      delete.addAll(getScheduledForDeletion(putativeCachePaths, CacheLocator::isCalCacheFile));
     }
     return delete;
   }
@@ -89,7 +97,7 @@ public class LogicClean {
           log.warn("Error collecting files for deletion in subtree: {}" + path, e);
         }
       } else {
-        if (condition.test(path)) {
+        if (Files.exists(path) && condition.test(path)) {
           delete.add(path);
         }
       }
@@ -97,65 +105,26 @@ public class LogicClean {
     return new ArrayList<>(delete);
   }
 
-  private class DeletionStats {
-    int scheduled = 0;
-    int deleted = 0;
-    ConcurrentLinkedQueue<Path> skipped = new ConcurrentLinkedQueue<>();
+  private static class DeletionStats {
+    ConcurrentLinkedQueue<Path> scheduled = new ConcurrentLinkedQueue<>();
+    ConcurrentLinkedQueue<Path> deleted = new ConcurrentLinkedQueue<>();
     ConcurrentLinkedQueue<Path> error = new ConcurrentLinkedQueue<>();
   }
 
-  private DeletionStats deleteMatchingFilesInSubtrees(Iterable<? extends Path> paths, Predicate<? super Path> condition, boolean dryRun) {
-    final ConcurrentLinkedQueue<Path> delete = new ConcurrentLinkedQueue<>();
-    final DeletionStats stats = new DeletionStats();
-
-    for (Path path : paths) {
-      if (Files.isDirectory(path)) {
-        try {
-          Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-              if (!Files.isReadable(dir)) return FileVisitResult.SKIP_SUBTREE;
-              return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-              if (!Files.isWritable(file)) {
-                log.warn("File not writeable, skipping: {}", file);
-                stats.skipped.add(file);
-                return FileVisitResult.CONTINUE;
-              }
-              if (condition.test(file)) delete.add(file);
-              return FileVisitResult.CONTINUE;
-            }
-          });
-        } catch (IOException e) {
-          log.error("Error collecting files for deletion in subtree: {}" + path, e);
-        }
-      } else {
-        if (CacheLocator.isPepCacheFile(path))
-          delete.add(path);
-      }
-    }
-
-    if (!delete.isEmpty()) {
-      log.info("Files scheduled for deletion:\n    {}",
-          delete.stream().map(Path::toString).collect(Collectors.joining("\n    ")));
-    } else {
-      log.info("Found no files to delete.");
-    }
-    stats.scheduled = delete.size();
-
-    if (!dryRun) delete.forEach(path -> {
+  public static DeletionStats delete(List<Path> pathsToDelete) {
+    DeletionStats ds = new DeletionStats();
+    ds.scheduled.addAll(pathsToDelete);
+    for (Path path : pathsToDelete) {
       try {
-        Files.deleteIfExists(path);
-        stats.deleted++;
+        if (Files.deleteIfExists(path)) {
+          ds.deleted.add(path);
+        }
       } catch (IOException e) {
-        log.error("Could not delete file: " + path, e);
-        stats.error.add(path);
+        log.error("Error deleting file: " + path.toString() + "\nDetails:\n" + e.getMessage());
+        ds.error.add(path);
       }
-    });
-
-    return stats;
+    }
+    return ds;
   }
+
 }

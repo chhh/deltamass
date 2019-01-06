@@ -20,15 +20,14 @@ public final class DeltaMassInfo {
   private static final EventBus bus = EventBus.getDefault();
 
   public static final String Name = "DeltaMass";
-  public static final String Ver = "1.0";
+  public static final String Ver = "1.1";
 
   private static final String PROP_VER = "deltamass.version.current";
   private static final String PROP_DOWNLOAD_URL = "deltamass.download.url";
   private static final String DEFAULT_DOWNLOAD_URL = "https://github.com/chhh/deltamass/releases";
-  private static final String BUNDLE_PATH = "com/dmtavt/deltamass/Bundle";
+  private static final String BUNDLE_PATH = "com/dmtavt/deltamass/Bundle.properties";
   private static final String BUNDLE_URL =
-      "https://raw.githubusercontent.com/chhh/deltamass/master/src/main/java/" + BUNDLE_PATH
-      + ".properties";
+      "https://raw.githubusercontent.com/chhh/deltamass/master/src/main/java/" + BUNDLE_PATH;
   private static final URI BUNDLE_URI = URI.create(BUNDLE_URL);
 
   private DeltaMassInfo() {
