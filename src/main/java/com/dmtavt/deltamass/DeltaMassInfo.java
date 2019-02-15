@@ -20,7 +20,7 @@ public final class DeltaMassInfo {
   private static final EventBus bus = EventBus.getDefault();
 
   public static final String Name = "DeltaMass";
-  public static final String Ver = "1.1";
+  public static final String Ver = "1.2.b03";
 
   private static final String PROP_VER = "deltamass.version.current";
   private static final String PROP_DOWNLOAD_URL = "deltamass.download.url";

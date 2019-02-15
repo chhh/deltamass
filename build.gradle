@@ -3,13 +3,13 @@ plugins {
     id 'application'
     id 'maven'
     id 'idea'
-    id 'com.github.johnrengelman.shadow' version '4.0.3'
+    id 'com.github.johnrengelman.shadow' version '4.0.4'
     id 'edu.sc.seis.launch4j' version '2.4.4'
     id "com.github.ben-manes.versions" version '0.20.0'
 }
 
 group = 'com.dmtavt'
-version = '1.1'
+version = '1.2.b03'
 
 description = """DeltaMass - detection and visualization of common mass shifts in proteomic searches."""
 
@@ -29,12 +29,18 @@ jar {
 
 shadowJar {
     classifier = null
-    minimize {
-        exclude(dependency('javax.xml.bind:jaxb-api:.*'))
-        exclude(dependency('org.glassfish.jaxb:jaxb-runtime:.*'))
-        exclude(dependency('javax.activation:javax.activation-api:.*'))
-        exclude(dependency('com.sun.istack:istack-commons-runtime:.*'))
-    }
+//    minimize {
+//        exclude(dependency("javax.xml.bind:jaxb-api:.*"))
+//        exclude(dependency("javax.activation:javax.activation-api:.*"))
+//        exclude(dependency("org.glassfish.jaxb:jaxb-runtime:.*"))
+//        exclude(dependency("javax.xml.bind:jaxb-api:.*"))
+//        exclude(dependency("org.glassfish.jaxb:txw2:.*"))
+//        exclude(dependency("com.sun.istack:istack-commons-runtime:.*"))
+//        exclude(dependency("org.jvnet.staxex:stax-ex:.*"))
+//        exclude(dependency("com.sun.xml.fastinfoset:FastInfoset:.*"))
+//        exclude(dependency("javax.activation:javax.activation-api:.*"))
+        //exclude(dependency(""))
+//    }
 }
 
 launch4j {
@@ -89,5 +95,5 @@ dependencies {
     // test
     testCompile(group: 'org.apache.maven', name: 'maven-model', version: '3.6.0')
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile("org.assertj:assertj-core:3.11.1")
+    testCompile("org.assertj:assertj-core:3.12.0")
 }
