@@ -1,5 +1,14 @@
 # DeltaMass: view and interrogate open search proteomics data
-
+<table border="0" style="border: 0px solid black;">
+ <tr>
+  <td>
+<img width="100%" src="https://raw.githubusercontent.com/chhh/deltamass/develop/img/deltamass-ui-new_plot-display-02.png" />
+  </td>
+  <td>
+<img width="100%" src="https://raw.githubusercontent.com/chhh/deltamass/develop/img/histogram-problems-01.png" />
+   </td>
+  </tr>
+</table>
 
 This program will plot mass-differences from a proteomic "Open Search".
 An "Open Search" is any search of fragmentation spectra (MS2) against a
@@ -57,4 +66,50 @@ first, so you might want to try the GUI version first.
  results that fall into this range.
  * `RMB click` - options for the plot (__Preferences__), you can also save the
  plot from here (prefer saving to _PNG_) and change how zooming works.
+ 
+# Citing
+If you have used this software in your work or research, please cite:
+<table>
+  <tr>
+    <td>
+      <b>Manuscript</b>
+    </td>
+    <td>
+Dmitry M. Avtonomov, Andy Kong, and Alexey I. Nesvizhskii, "DeltaMass: Automated Detection and Visualization of Mass Shifts in Proteomic Open-Search Results". J. Proteome Res., 2019, 18 (2), pp 715–720
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>DOI</b>
+    </td>
+    <td>
+ 10.1021/acs.jproteome.8b00728
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>BibTex</b>
+    </td>
+    <td>
+      <pre>
+ @article{Avtonomov2019,
+  author = {Avtonomov, Dmitry M. and Kong, Andy and Nesvizhskii, Alexey I.},
+  title = {DeltaMass: Automated Detection and Visualization of Mass Shifts in Proteomic Open-Search Results},
+  journal = {J. Proteome Res.},
+  publisher = {American Chemical Society},
+  year = {2019},
+  volume = {18},
+  number = {2},
+  pages = {715--720},
+  url = {https://doi.org/10.1021/acs.jproteome.8b00728},
+  doi = {https://doi.org/10.1021/acs.jproteome.8b00728}
+}
+      </pre>
+    </td>
+  </tr>
+</table>
+
+
+ 
+ 
  
