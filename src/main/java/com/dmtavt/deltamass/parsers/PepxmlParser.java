@@ -169,7 +169,14 @@ public class PepxmlParser implements IPepidParser {
           if (mi == null) {
             spm.seqModStateId = spm.seq;
           } else {
-            StringBuilder sb = new StringBuilder(mi.getModifiedPeptide());
+            StringBuilder sb = new StringBuilder();
+            if (mi.getModifiedPeptide() != null) {
+              sb.append(mi.getModifiedPeptide());
+            } else if (sh.getPeptide() != null) {
+              sb.append(sh.getPeptide());
+            } else {
+              throw new IOException("ModificationInfo->ModifiedPeptide and SearchHit->Peptide were both not present");
+            }
             StringBuilder sbMods = new StringBuilder();
             if (mi.getModNtermMass() != null) {
               sb.append(String.format("_%.2f@0", mi.getModNtermMass()));

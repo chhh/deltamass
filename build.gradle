@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'com.dmtavt'
-version = '1.2.1'
+version = '1.2.2'
 
 description = """DeltaMass - detection and visualization of common mass shifts in proteomic searches."""
 
